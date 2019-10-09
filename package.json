@@ -32,5 +32,10 @@
   },
   "browserslist": [
     "last 1 chrome versions"
-  ]
+  ],
+  "svelte": {
+    "compiler": {
+      "css": false
+    }
+  }
 }
