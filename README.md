@@ -26,7 +26,7 @@ An easy-to-use Svelte template!
 
 - npm run clean
 
-  > 모든 dist 파일 안의 파일들을 삭제합니다. 다만 dist 아래의 폴더는 삭제하지 않습니다. 만약 삭제되지 않아야할 static resource 가 있다면 dist 폴더 내에 폴더를 생성한 후 사용하시면 됩니다.
+  > This command deletes all files in the 'dist' folder. However, the folder below the list is not deleted. If there is a static resource that should not be deleted, create a folder in the folder and use it.
 
 
 
