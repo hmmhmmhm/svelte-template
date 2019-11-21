@@ -4,7 +4,7 @@
         c: string = "Parcel"
 </script>
 
-<style>
+<style type="scss">
   h1 {
     font: normal 24pt Lato, "Helvetica Neue", Arial, Helvetica, sans-serif;
     color: dimgray;
