@@ -1,7 +1,7 @@
 import Bundler from 'parcel-bundler'
 import path from 'path'
-import tempDir from 'temp-dir'
 import { serve } from './parcel.serve'
+import SveltePlugin from 'parcel-plugin-svelte'
 
 export const template = path.join(process.cwd(), './src/index.html')
 
@@ -11,36 +11,45 @@ export const options = {
   publicUrl: './',
   watch: false,
   cache: true,
-  cacheDir: `${tempDir}/parcelCache`,
   minify: false,
   target: 'browser',
   https: false,
   logLevel: 3,
   hmrPort: 0,
+  production: false,
   hmrHostname: '',
   sourceMaps: false,
-  detailedReport: false
+  detailedReport: true
 }
 
-export const getBundler = (options) => {
-  return new Bundler(template, options)
+export const getBundler = async (options) => {
+  let bundler = new Bundler(template, options)
+  await SveltePlugin(bundler)
+  return bundler
 }
 
 export const runBundle = async (options) => {
-  return await getBundler(options).bundle()
+  let bundler = await getBundler(options)
+  return await bundler.bundle()
 }
 
 if(process.argv[1] == __filename){
   switch(process.argv[2]){
-      case '--serve':
-          serve()
-          break
-      case '--build':
-          runBundle({...options, minify: true})
-          break
-      case '--watch':
-          runBundle({...options, watch: true})
-          break
+    case '--serve':
+      serve()
+      break
+    case '--watch':
+      runBundle({...options, production: true, watch: true})
+      break
+    case '--build':
+      runBundle({...options, production: true, minify: true, hmr: false})
+      break
+    case '--product-build':
+      runBundle({...options, production: true, minify: true, outDir: './production', hmr: false})
+      break
+    case '--product-serve':
+      serve({isProductMode: true})
+      break
   }
 }
 

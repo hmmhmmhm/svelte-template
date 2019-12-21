@@ -20,17 +20,23 @@ export const testCertificate = {
   cert: readFileSync('./config/development/test.cert', 'utf8')
 }
 
-export const serve = async () => {
+export const serve = async ({isProductMode} = {isProductMode: false}) => {
   const Logger = new FolderLogger('./logs')
   const expressInstance = Express()
 
   // Enable CORS
   expressInstance.use(CORS())
 
-  try{ mkdirSync(`${process.cwd()}/dist`) } catch(e){}
+  // Publish Path
+  let publishPath = `${process.cwd()}/dist`
+  if(isProductMode){
+    publishPath = `${process.cwd()}/production`
+  }
+
+  try{ mkdirSync(publishPath) } catch(e){}
 
   // Register Static Files
-  NestedStatic(`${process.cwd()}/dist`, (folders) => {
+  NestedStatic(publishPath, (folders) => {
     Logger.debug(`🚧  Registering a static resources path...`)
     for(let {staticPath, subPath} of folders){
         expressInstance.use(subPath, Express.static(staticPath))
@@ -39,7 +45,9 @@ export const serve = async () => {
   })
 
   // Register Parcel
-  expressInstance.use(getBundler({...options, watch: true}).middleware())
+  if(!isProductMode){
+    expressInstance.use((await getBundler({...options, watch: true})).middleware())
+  }
 
   // Collect Server Handles
   let handles = {
@@ -47,20 +55,23 @@ export const serve = async () => {
     httpsServer: https.createServer(testCertificate, expressInstance)
   }
 
-  let publicIp = await PublicIp.v4()
+  let publicIp: string | undefined = undefined
+  try{
+    publicIp = await PublicIp.v4()
+  }catch(e) {}
 
   // Binding a Port
   handles.httpServer.listen(httpPort, () => {
     console.log('')
     Logger.debug(`🚧  HTTP Server Running...`)
     Logger.debug(`🚧  - http://localhost:${httpPort}`)
-    Logger.debug(`🚧  - http://${publicIp}:${httpPort}`)
+    if(publicIp) Logger.debug(`🚧  - http://${publicIp}:${httpPort}`)
   })
   handles.httpsServer.listen(httpsPort, () => {
     console.log('')
     Logger.debug(`🚧  HTTPS Server Running...`)
     Logger.debug(`🚧  - https://localhost:${httpsPort}`)
-    Logger.debug(`🚧  - https://${publicIp}:${httpsPort}`)
+    if(publicIp) Logger.debug(`🚧  - https://${publicIp}:${httpsPort}`)
   })
 
   return handles
