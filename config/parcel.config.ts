@@ -1,7 +1,6 @@
 import Bundler from 'parcel-bundler'
 import path from 'path'
 import { serve } from './parcel.serve'
-import SveltePlugin from 'parcel-plugin-svelte'
 
 export const template = path.join(process.cwd(), './src/index.html')
 
@@ -24,7 +23,6 @@ export const options = {
 
 export const getBundler = async (options) => {
   let bundler = new Bundler(template, options)
-  await SveltePlugin(bundler)
   return bundler
 }
 
