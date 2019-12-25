@@ -10,69 +10,73 @@ import https from 'https'
 import PublicIp from 'public-ip'
 
 // Default Arguments
-yargs
-  .default('http-port', 8080)
-  .default('https-port', 8443)
+yargs.default('http-port', 8080).default('https-port', 8443)
 let { httpPort, httpsPort } = yargs.argv
 
 export const testCertificate = {
-  key: readFileSync('./config/development/test.key', 'utf8'),
-  cert: readFileSync('./config/development/test.cert', 'utf8')
+    key: readFileSync('./config/development/test.key', 'utf8'),
+    cert: readFileSync('./config/development/test.cert', 'utf8'),
 }
 
-export const serve = async ({isProductMode} = {isProductMode: false}) => {
-  const Logger = new FolderLogger('./logs')
-  const expressInstance = Express()
+export const serve = async ({ isProductMode } = { isProductMode: false }) => {
+    const Logger = new FolderLogger('./logs')
+    const expressInstance = Express()
 
-  // Enable CORS
-  expressInstance.use(CORS())
+    // Enable CORS
+    expressInstance.use(CORS())
 
-  // Publish Path
-  let publishPath = `${process.cwd()}/dist`
-  if(isProductMode){
-    publishPath = `${process.cwd()}/production`
-  }
-
-  try{ mkdirSync(publishPath) } catch(e){}
-
-  // Register Static Files
-  NestedStatic(publishPath, (folders) => {
-    Logger.debug(`🚧  Registering a static resources path...`)
-    for(let {staticPath, subPath} of folders){
-        expressInstance.use(subPath, Express.static(staticPath))
-        Logger.debug(`🚧  Static Path: ${subPath}`)
+    // Publish Path
+    let publishPath = `${process.cwd()}/dist`
+    if (isProductMode) {
+        publishPath = `${process.cwd()}/production`
     }
-  })
 
-  // Register Parcel
-  if(!isProductMode){
-    expressInstance.use((await getBundler({...options, watch: true})).middleware())
-  }
+    try {
+        mkdirSync(publishPath)
+    } catch (e) {}
 
-  // Collect Server Handles
-  let handles = {
-    httpServer: http.createServer(expressInstance),
-    httpsServer: https.createServer(testCertificate, expressInstance)
-  }
+    // Register Static Files
+    NestedStatic(publishPath, folders => {
+        Logger.debug(`🚧  Registering a static resources path...`)
+        for (let { staticPath, subPath } of folders) {
+            expressInstance.use(subPath, Express.static(staticPath))
+            Logger.debug(`🚧  Static Path: ${subPath}`)
+        }
+    })
 
-  let publicIp: string | undefined = undefined
-  try{
-    publicIp = await PublicIp.v4()
-  }catch(e) {}
+    // Register Parcel
+    if (!isProductMode) {
+        expressInstance.use(
+            (await getBundler({ ...options, watch: true })).middleware()
+        )
+    }
 
-  // Binding a Port
-  handles.httpServer.listen(httpPort, () => {
+    // Collect Server Handles
+    let handles = {
+        httpServer: http.createServer(expressInstance),
+        httpsServer: https.createServer(testCertificate, expressInstance),
+    }
+
+    // Binding a Port
     console.log('')
-    Logger.debug(`🚧  HTTP Server Running...`)
-    Logger.debug(`🚧  - http://localhost:${httpPort}`)
-    if(publicIp) Logger.debug(`🚧  - http://${publicIp}:${httpPort}`)
-  })
-  handles.httpsServer.listen(httpsPort, () => {
-    console.log('')
-    Logger.debug(`🚧  HTTPS Server Running...`)
-    Logger.debug(`🚧  - https://localhost:${httpsPort}`)
-    if(publicIp) Logger.debug(`🚧  - https://${publicIp}:${httpsPort}`)
-  })
+    Logger.debug(`🚧  HTTP & HTTPS Server Running...`)
+    handles.httpServer.listen(httpPort, () => {
+        Logger.debug(`🚧  - http://localhost:${httpPort}`)
+    })
+    handles.httpsServer.listen(httpsPort, () => {
+        Logger.debug(`🚧  - https://localhost:${httpsPort}`)
+    })
 
-  return handles
+    let publicIp: string | undefined = undefined
+    try {
+        publicIp = await PublicIp.v4()
+    } catch (e) {}
+    if (publicIp) {
+        console.log('')
+        Logger.debug(`🚧  External HTTP & HTTPS Server Address`)
+        Logger.debug(`🚧  - http://${publicIp}:${httpPort}`)
+        Logger.debug(`🚧  - https://${publicIp}:${httpsPort}`)
+    }
+
+    return handles
 }

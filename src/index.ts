@@ -1,3 +1,4 @@
+// @ts-ignore
 import Svelte from './index.svelte'
 
 new Svelte({

@@ -5,7 +5,17 @@ const autoprefixer = require('autoprefixer')
 // For svelte-vscode
 let configJs = { preprocess: pyoner.preprocess() }
 
-if (process.argv[1].indexOf('--') != -1) {
+// Check svelte-vscode
+let isSvelteLanguageServer = false
+for (let argv of process.argv) {
+  if (argv.indexOf('svelte-language-server') != -1) {
+    isSvelteLanguageServer = true
+    break
+  }
+}
+
+// If the call is by an instance, not by svelte-vscode.
+if (!isSvelteLanguageServer) {
   configJs = {
     preprocess: [
       scss(),
@@ -18,4 +28,5 @@ if (process.argv[1].indexOf('--') != -1) {
     ]
   }
 }
+
 module.exports = configJs
