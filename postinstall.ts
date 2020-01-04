@@ -29,7 +29,6 @@ const collect = (staticPath, subPath = '/') => {
 const find = staticPath => {
     let folders = []
 
-
     for(let folder of collect(staticPath))
         if(fs.existsSync(folder.staticPath + `/package.json`))
             folders.push(folder.staticPath)
