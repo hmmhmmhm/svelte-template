@@ -1,6 +1,6 @@
 {
   "name": "svelte-template",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "autoprefixer": "^9.7.3",
+    "core-js": "^3.6.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "folder-logger": "^1.0.7",

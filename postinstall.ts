@@ -2,16 +2,51 @@
 const fs = require('fs')
 const nodeVersion = 'node 10.11'
 
-// Patch to node_modules/*
+const exceptionList = [
+    './node_modules/core-js',
+    './node_modules/core-js-compat',
+]
+
+const collect = (staticPath, subPath = '/') => {
+	let files = fs.readdirSync(staticPath)
+	let folders = [{subPath,staticPath}]
+
+	for(let file of files){
+        let checkPath = staticPath + '/' + file
+		let stats = fs.statSync(checkPath)
+        if(! stats.isDirectory()) continue
+
+        if(exceptionList.indexOf(checkPath) != -1) continue
+		let collectedDatas = collect(checkPath, subPath + file + '/')
+
+		for(let collectedData of collectedDatas)
+			folders.push(collectedData)
+	}
+
+	return folders
+}
+
+const find = staticPath => {
+    let folders = []
+
+
+    for(let folder of collect(staticPath))
+        if(fs.existsSync(folder.staticPath + `/package.json`))
+            folders.push(folder.staticPath)
+
+    return folders
+}
+
 const patch = staticPath => {
-    let folderNames = fs.readdirSync(staticPath)
-    for (let folderName of folderNames) {
-        let stats = fs.statSync(staticPath + '/' + folderName)
+    let folders = find(staticPath)
+    
+    for (let folderName of folders) {
+        let stats = fs.statSync(folderName)
         if (!stats.isDirectory()) continue
 
         try {
-            let packageFilePath = `${staticPath}/${folderName}/package.json`
-            let browserListFilePath = `${staticPath}/${folderName}/.browserslistrc`
+            let packageFilePath = `${folderName}/package.json`
+            let browserListFilePath = `${folderName}/.browserslistrc`
             let packageFileData = JSON.parse(fs.readFileSync(packageFilePath))
 
             delete packageFileData['browserslist']
@@ -21,10 +56,6 @@ const patch = staticPath => {
                 JSON.stringify(packageFileData, null, 2)
             )
             // console.log(`Fixed browserlist in ${packageFilePath}`)
-
-            // Patch to node_modules/*/node_modules/*
-            let nestedModulePath = `${staticPath}/${folderName}/node_modules`
-            if (fs.existsSync(nestedModulePath)) patch(nestedModulePath)
         } catch (e) {}
     }
 }
