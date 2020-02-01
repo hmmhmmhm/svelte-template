@@ -1,11 +1,12 @@
 {
     "compilerOptions": {
+        "outDir": "./production-ts",
         "importHelpers": true,
         "sourceMap": false,
         "inlineSourceMap": false,
         "noImplicitAny": false,
         "module": "commonjs",
-        "target": "ES5",
+        "target": "ES3",
         "types": ["node"],
         "lib": ["dom"],
         "moduleResolution": "node",
@@ -18,15 +19,11 @@
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "baseUrl": "."
     },
     "include": [
         "./src/**/*",
         "./config/**/*"
-    ],
-    "awesomeTypescriptLoaderOptions": {
-        "reportFiles": [
-            "./src/**/*"
-        ]
-    }
+    ]
 }
