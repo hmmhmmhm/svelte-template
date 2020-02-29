@@ -25,7 +25,10 @@ if (!isSvelteLanguageServer) {
         ]
       }),
       pyoner.preprocess()
-    ]
+    ],
+    compilerOptions: {
+      css: false
+    }
   }
 }
 
