@@ -29,7 +29,7 @@
     "postcss": "^7.0.29",
     "postcss-load-config": "^2.1.0",
     "public-ip": "^4.0.1",
-    "svelte": "^3.22.2",
+    "svelte": "^3.49.0",
     "svelte-preprocess": "^3.7.4",
     "svelte-preprocess-sass": "^0.2.0",
     "svelte-ts-preprocess": "^1.1.3",
