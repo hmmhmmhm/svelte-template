@@ -20,7 +20,7 @@
     "caniuse-lite": "^1.0.30001051",
     "core-js": "^3.6.5",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "folder-logger": "^1.0.7",
     "nested-static": "^1.1.0",
     "node-sass": "^4.14.1",
